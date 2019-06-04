@@ -383,7 +383,7 @@
             window.location.reload();
           }
       });
-      },  
+      },
       getFileList(file) {
         // var fDiv = document.getElementById("fileOption");
         // var fList = document.createElement("ul");
