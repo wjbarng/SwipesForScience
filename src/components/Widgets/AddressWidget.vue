@@ -15,16 +15,8 @@
       <!-- PDF Display -->
       <div class="col">
           <div style="display:block;width:100%;height:85vh;margin-bottom:10px;">
-            <iframe :src="pdfData" frameborder="0" style="width:100%;height:100%;" ></iframe>
+            <iframe :src="pdfData" frameborder="0" style="width:100%;height:95%;" ></iframe>
           </div>
-          <b-button id="tooltip-button-1" variant="primary" style="margin-top: 10px">More Files</b-button>
-          <b-tooltip class="tool" :show.sync="show" data-container="body" target="tooltip-button-1" placement="righttop" trigger="click">
-            <ul>
-              <li v-for="file in fileOption" @click="getSource(file)" :key="file" style="list-style-type: none; text-align: left;">
-                {{file}}
-              </li>
-            </ul>
-          </b-tooltip>
       </div>
         <!-- Content Display -->
         <!-- <div class="col" style="margin-top: 100px;"> -->
@@ -36,9 +28,7 @@
             <div class="col-3 lead">
               <span></span>
               <br>
-              <span>Confidence Rate </span>
-              <br>
-              <span>{{this.confidence}}%</span>
+              <span>Confidence:  </span><span>{{this.confidence}}%</span>
             </div>
             <div class="col lead">
               <span v-if="name!=null">{{name}}</span>
@@ -137,6 +127,16 @@
               <div v-if="!hideInfo">
                 <div class=" row mx-auto ml-4 mr-4" style="text-align:left; margin:20px;">
                   <div class = "address" style="margin:0;">
+                    <!-- <p style="margin:0;"> File: </p>
+                    <select id="files" name="files" class=" row mx-auto ml-4 mr-4" style="text-align:left; margin:20px; width:200px;">
+                      <option v-for="file in fileOption" @click="getSource(file)" :key="file" style="width:200px;"> {{file}} </option>
+                  </select> -->
+                    <p>File: </p>
+                    <p>{{ this.fileName }}</p>
+                  </div>
+                </div>
+                <div class=" row mx-auto ml-4 mr-4" style="text-align:left; margin:20px;">
+                  <div class = "address" style="margin:0;">
                     <p style="margin:0;"> Court: </p>
                     <p class="description"> name of the court ex) Seattle </p>
                     <input v-model="court" placeholder="Enter court here">
@@ -157,23 +157,24 @@
                   </div>
                 </div>
               </div>
-             <b-btn v-if="hideInfo" @click="hideInfo = !hideInfo" class="mx-auto ml-3 mr-3" >More Info.</b-btn>
-             <b-btn v-if="!hideInfo" @click="hideInfo = !hideInfo" class="mx-auto ml-3 mr-3" >Hide Info.</b-btn>
-              <div class=" row mx-auto ml-4 mr-4" style="text-align:left; margin:20px;">
-                <div class = "address" style="margin:0;">
-                  <p style="margin:0;"> File: </p>
-                  <select id="files" name="files" class=" row mx-auto ml-4 mr-4" style="text-align:left; margin:20px; width:200px;">
-                    <option v-for="file in fileOption" @click="getSource(file)" :key="file" style="width:200px;"> {{file}} </option>
-                </select>
-                </div>
-              </div>
+             <b-btn v-if="hideInfo" @click="hideInfo = !hideInfo" class="mx-auto ml-3 mr-3" style="margin-bottom:20px;">More Info.</b-btn>
+             <b-btn v-if="!hideInfo" @click="hideInfo = !hideInfo" class="mx-auto ml-3 mr-3" style="margin-bottom:20px;">Hide Info.</b-btn>
             </div>
           </div>
+        <div class="row" v-if="playMode">
+          <b-button id="tooltip-button-1" class="mx-auto ml-3 mr-3" variant="primary" style="margin-top: 10px">More Files</b-button>
+            <b-tooltip class="tool" :show.sync="show" data-container="body" target="tooltip-button-1" placement="righttop" trigger="click">
+              <ul>
+                <li v-for="file in fileOption" @click="getSource(file)" :key="file" style="list-style-type: none; text-align: left;">
+                  {{file}}
+                </li>
+              </ul>
+            </b-tooltip>
+          <b-btn variant="info" :to="'/review/' + widgetPointer" class="mx-auto ml-3 mr-3" >Discuss</b-btn>
+          <b-btn variant="success" @click="vote" class="mx-auto ml-3 mr-3">Submit</b-btn>
       </div>
-      <div class="row" v-if="playMode">
-        <b-btn variant="info" :to="'/review/' + widgetPointer" class="mx-auto ml-3 mr-3" >Discuss</b-btn>
-        <b-btn variant="success" @click="vote" class="mx-auto ml-3 mr-3">Submit</b-btn>
       </div>
+     
       </div>
       </div>
     </div>
@@ -350,7 +351,8 @@
       getSource(file) {
         // API Call to fetch PDF
         const token = this.userSettings.secret;
-        file = encodeURIComponent(file)
+        this.fileName = file;
+        file = encodeURIComponent(file);
         var fileUrl = `https://tesseract.csde.washington.edu:8080/swipes/${this.widgetPointer}/` + `pdffile64?name=`+ file;
         axios({
           method: 'get',
@@ -436,15 +438,15 @@
         return {};
       },
       vote() {
-        var selectedFile = document.getElementById("files")
-        var sFileName = selectedFile.options[selectedFile.selectedIndex].text
+        // var selectedFile = document.getElementById("files")
+        // var sFileName = selectedFile.options[selectedFile.selectedIndex].text
         this.$emit('widgetRating',
                     {name: this.name,
                      casenumber: this.casenumber,
                      streetName: this.streetName,
                      city: this.city,
                      year: this.year,
-                     fileName: sFileName,
+                     fileName: this.fileName,
                      house: this.house,
                      preDirection: this.preDirection,
                      street: this.street,

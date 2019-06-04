@@ -73,6 +73,7 @@
     right: 5px;
 }
 .footer {
+  display: none;
   position: relative;
   height: 200px;
 }
