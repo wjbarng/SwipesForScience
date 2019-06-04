@@ -32,26 +32,35 @@
           <p v-if="!playMode" class="mb-3 pb-3 mt-3 pt-3">{{ widgetSummary }}</p>
           <!-- Data pointer: {{ widgetPointer }} -->
           <div style="height:95vh;">
-          <div class="lead">
-            <span v-if="name!=null">{{name}}</span>
-            <br>
-            <span>{{house}}</span>
-            <span>{{preDirection}}</span>
-            <span>{{streetName}}</span>
-            <span>{{street}}</span>
-            <span>{{postDirection}}</span>
-            <span>{{court}}</span>
-            <span>{{courtName}}</span>
-            <span>{{unit}}</span>
-            <span>{{unitName}}</span>
-            <br>
-            <span>{{city}}</span>,
-            <span>{{state}}</span>,
-            <span>{{zip}}</span>
+          <div class="row">
+            <div class="col-3 lead">
+              <span></span>
+              <br>
+              <span>Confidence Rate </span>
+              <br>
+              <span>{{this.confidence}}%</span>
+            </div>
+            <div class="col lead">
+              <span v-if="name!=null">{{name}}</span>
+              <br>
+              <span>{{house}}</span>
+              <span>{{preDirection}}</span>
+              <span>{{streetName}}</span>
+              <span>{{street}}</span>
+              <span>{{postDirection}}</span>
+              <span>{{court}}</span>
+              <span>{{courtName}}</span>
+              <span>{{unit}}</span>
+              <span>{{unitName}}</span>
+              <br>
+              <span>{{city}}</span>,
+              <span>{{state}}</span>,
+              <span>{{zip}}</span>
+            </div>
           </div>
 
           <!-- Response Display -->
-          <div style="overflow-y:scroll; overflow-x:hidden; height:80%;" >
+          <div style="overflow-y:scroll; overflow-x:hidden; height:80%; padding-bottom:50px;" >
           <div class="row">
             <div class="col">
               <div class=" row mx-auto ml-4 mr-4" style="text-align:left; margin:20px;">
@@ -150,6 +159,14 @@
               </div>
              <b-btn v-if="hideInfo" @click="hideInfo = !hideInfo" class="mx-auto ml-3 mr-3" >More Info.</b-btn>
              <b-btn v-if="!hideInfo" @click="hideInfo = !hideInfo" class="mx-auto ml-3 mr-3" >Hide Info.</b-btn>
+              <div class=" row mx-auto ml-4 mr-4" style="text-align:left; margin:20px;">
+                <div class = "address" style="margin:0;">
+                  <p style="margin:0;"> File: </p>
+                  <select id="files" name="files" class=" row mx-auto ml-4 mr-4" style="text-align:left; margin:20px; width:200px;">
+                    <option v-for="file in fileOption" @click="getSource(file)" :key="file" style="width:200px;"> {{file}} </option>
+                </select>
+                </div>
+              </div>
             </div>
           </div>
       </div>
@@ -249,6 +266,12 @@
         const password = this.password;
         this.$emit('updateUserSettings', { password });
       },
+      // setHideInfo() {
+      //   console.log(this.court)
+      //   if (this.court != "" || this.court !=null) {
+      //     this.hideInfo = false;
+      //   }
+      // },
       getPdf() {
         this.status = 'loading';
 
@@ -302,6 +325,8 @@
               this.zip = listFixed(address.zip);
               this.state = listFixed(address.stateName);
               this.county = listFixed(address.countyName);
+              console.log(listFixed(address.confidence));
+              this.confidence = Math.round(parseFloat(listFixed(address.confidence))*100* 100) / 100;
               this.getSource(this.fileName);
           }).catch(error => {
             if(error.response.status == 401) {
@@ -411,13 +436,15 @@
         return {};
       },
       vote() {
+        var selectedFile = document.getElementById("files")
+        var sFileName = selectedFile.options[selectedFile.selectedIndex].text
         this.$emit('widgetRating',
                     {name: this.name,
                      casenumber: this.casenumber,
                      streetName: this.streetName,
                      city: this.city,
                      year: this.year,
-                     fileName: this.fileName,
+                     fileName: sFileName,
                      house: this.house,
                      preDirection: this.preDirection,
                      street: this.street,
